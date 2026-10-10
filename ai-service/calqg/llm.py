@@ -139,14 +139,60 @@ class MockLLM(BaseLLM):
                 "concept": c, "question_type": slot["qtype"]}
 
 
+class FallbackLLM(BaseLLM):
+    """Wrapper that tries primary LLM, and on failure (e.g. Rate Limit 429), falls back to secondary LLMs or MockLLM."""
+    def __init__(self, llms):
+        self.llms = llms
+        self.name = f"fallback({','.join(l.name for l in llms)})"
+
+    def complete(self, prompt):
+        last_err = None
+        for llm in self.llms:
+            try:
+                return llm.complete(prompt)
+            except Exception as e:
+                last_err = e
+                print(f"[LLM Fallback Warning] {llm.name} failed: {e}. Trying next provider...")
+        if last_err:
+            raise last_err
+
+    def generate_question(self, slot, context_chunks, constraints, attempt):
+        last_err = None
+        for llm in self.llms:
+            try:
+                return llm.generate_question(slot, context_chunks, constraints, attempt)
+            except Exception as e:
+                last_err = e
+                print(f"[LLM Fallback Warning] {llm.name} failed: {e}. Trying next provider...")
+        if last_err:
+            raise last_err
+
+
 def make_llm(provider="auto", cfg=None):
     from .config import Config
     if cfg is None:
         cfg = Config()
+    
+    candidates = []
     if provider in ("auto", "groq") and os.getenv("GROQ_API_KEY"):
-        return GroqLLM(cfg.groq_model)
+        try:
+            candidates.append(GroqLLM(cfg.groq_model))
+        except Exception as e:
+            print(f"[LLM Init Warning] Failed to init GroqLLM: {e}")
     if provider in ("auto", "gemini") and os.getenv("GEMINI_API_KEY"):
-        return GeminiLLM(cfg.gemini_model)
+        try:
+            candidates.append(GeminiLLM(cfg.gemini_model))
+        except Exception as e:
+            print(f"[LLM Init Warning] Failed to init GeminiLLM: {e}")
     if provider in ("auto", "openai") and os.getenv("OPENAI_API_KEY"):
-        return OpenAILLM(cfg.openai_model)
-    return MockLLM()
+        try:
+            candidates.append(OpenAILLM(cfg.openai_model))
+        except Exception as e:
+            print(f"[LLM Init Warning] Failed to init OpenAILLM: {e}")
+
+    candidates.append(MockLLM())
+
+    if len(candidates) == 1:
+        return candidates[0]
+    return FallbackLLM(candidates)
+
