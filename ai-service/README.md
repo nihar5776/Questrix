@@ -6,7 +6,7 @@ generation and validation framework (Fig. 1). Runs fully offline out of the box
 
 ## Quick start
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python -m pytest -q tests               # 5 tests
 uvicorn calqg.api:app --port 8000       # REST service for the Node.js backend
 ```

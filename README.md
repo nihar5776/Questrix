@@ -72,7 +72,7 @@ Follow these steps to run Questrix AI locally:
    ```
 2. Install Python dependencies:
    ```bash
-   pip install -r requirements.txt
+   python -m pip install -r requirements.txt
    ```
 3. Set up environment variables:
    Create a `.env` file inside `ai-service/` (or copy `.env.example`):
