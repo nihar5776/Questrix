@@ -41,9 +41,9 @@ class CALQG:
         self.graph = self._build_graph()
 
     # ---------- Stage 1: knowledge preparation ----------
-    def ingest(self, path, concept_vocab):
-        chunks = build_chunks(path, concept_vocab, self.cfg)
-        self.store.add(chunks)
+    def ingest(self, path, concept_vocab, progress_cb=None):
+        chunks = build_chunks(path, concept_vocab, self.cfg, progress_cb=progress_cb)
+        self.store.add(chunks, progress_cb=progress_cb)
         for c in chunks:
             self.concept_stats.update(c["meta"]["concepts"])
         return len(chunks)

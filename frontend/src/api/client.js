@@ -26,6 +26,24 @@ export async function ingestDocument(file, concepts) {
   return data;
 }
 
+export async function getJobStatus(jobId) {
+  const res = await fetch(`${API_BASE}/ingest/status/${jobId}`);
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Failed to fetch job status');
+  }
+  return data;
+}
+
+export async function getLatestIngestionStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/ingest/latest`);
+    return await res.json();
+  } catch (err) {
+    return { total_chunks: 0, latest_job: null };
+  }
+}
+
 export async function generateQuestionPaper(payload) {
   const res = await fetch(`${API_BASE}/generate`, {
     method: 'POST',
