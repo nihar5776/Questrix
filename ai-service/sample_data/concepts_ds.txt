@@ -1,0 +1,14 @@
+Sorting
+Bubble sort
+Selection sort
+Insertion sort
+Linked List
+Singly linked list
+Doubly linked list
+Circular linked list
+Stack
+Postfix expression
+Balanced parentheses
+Infix to postfix
+Polynomials
+Reverse a linked list

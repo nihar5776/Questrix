@@ -1,0 +1,16 @@
+# Core (required)
+numpy>=1.26
+scikit-learn>=1.4
+scipy>=1.11
+langgraph>=0.2
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2.6
+pdfplumber>=0.11
+pypdf>=4.0
+
+# Optional upgrades (auto-detected; system falls back gracefully if missing)
+sentence-transformers>=2.7     # better embeddings (default fallback: TF-IDF)
+qdrant-client>=1.9             # persistent vector DB (default fallback: in-memory)
+google-generativeai>=0.7       # Gemini LLM   (set GEMINI_API_KEY)
+openai>=1.30                   # OpenAI LLM   (set OPENAI_API_KEY)
