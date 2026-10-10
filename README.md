@@ -94,7 +94,7 @@ Double-click **`start.bat`** in the project root folder (or run `./start.bat` in
    ```
 4. Launch the FastAPI server:
    ```bash
-   uvicorn calqg.api:app --reload --port 8000
+   python -m uvicorn calqg.api:app --reload --port 8000
    ```
    *Service will run on `http://localhost:8000` (Health check: `http://localhost:8000/health`).*
 

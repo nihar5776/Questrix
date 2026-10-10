@@ -8,7 +8,7 @@ generation and validation framework (Fig. 1). Runs fully offline out of the box
 ```bash
 python -m pip install -r requirements.txt
 python -m pytest -q tests               # 5 tests
-uvicorn calqg.api:app --port 8000       # REST service for the Node.js backend
+python -m uvicorn calqg.api:app --reload --port 8000       # REST service for the Node.js backend
 ```
 Real LLM: `export GEMINI_API_KEY=...` (or `OPENAI_API_KEY`). Optional upgrades are
 auto-detected: `sentence-transformers` (neural embeddings), `qdrant-client`.
