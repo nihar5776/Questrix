@@ -56,7 +56,12 @@ graph TD
 
 ## 🚀 How to Run the Application
 
-Follow these steps to run Questrix AI locally:
+### ⚡ 1-Click Launch (Windows)
+Double-click **`start.bat`** in the project root folder (or run `./start.bat` in terminal). It will automatically open 3 terminal windows and launch all three services!
+
+---
+
+### Manual Launch (Step-by-Step)
 
 ### Prerequisites
 * **Node.js**: v18.0.0 or higher ([Download Node.js](https://nodejs.org/))
