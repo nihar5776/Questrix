@@ -13,7 +13,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Health check proxy
 app.get('/api/health', async (req, res) => {
-  try: {
+  try {
     const response = await fetch(`${AI_SERVICE_URL}/health`);
     if (!response.ok) {
       throw new Error(`AI Service returned ${response.status}`);
