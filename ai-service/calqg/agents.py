@@ -26,7 +26,7 @@ def planner_agent(profile, concept_stats, bank, cfg):
         alloc[k] += 1
     blooms = [l for l in levels for _ in range(alloc[l])]
 
-    concepts = profile.get("concepts") or list(concept_stats)
+    concepts = profile.get("concepts") or list(concept_stats) or ["General"]
     asked = Counter(q["concept"] for q in bank)
     slots = []
     for i, b in enumerate(blooms):
