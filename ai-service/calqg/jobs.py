@@ -28,7 +28,8 @@ def create_job(temp_file_path: str, filename: str, filesize: int, concept_vocab:
         "concepts": {},
         "error": None,
         "created_at": now,
-        "updated_at": now
+        "updated_at": now,
+        "last_progress_at": now
     }
 
     with _LOCK:
@@ -42,13 +43,21 @@ def get_job(job_id: str) -> dict | None:
     with _LOCK:
         job = _JOBS.get(job_id)
         if job:
-            return dict(job)
+            j = dict(job)
+            j["stalled_seconds"] = round(time.time() - j["updated_at"], 1)
+            return j
     return None
 
 
 def get_all_jobs() -> list:
     with _LOCK:
-        return [dict(j) for j in _JOBS.values()]
+        now = time.time()
+        res = []
+        for j in _JOBS.values():
+            d = dict(j)
+            d["stalled_seconds"] = round(now - d["updated_at"], 1)
+            res.append(d)
+        return res
 
 
 def get_active_job() -> dict | None:
@@ -57,14 +66,19 @@ def get_active_job() -> dict | None:
         if not _JOBS:
             return None
         sorted_jobs = sorted(_JOBS.values(), key=lambda x: x["created_at"], reverse=True)
-        return dict(sorted_jobs[0])
+        j = dict(sorted_jobs[0])
+        j["stalled_seconds"] = round(time.time() - j["updated_at"], 1)
+        return j
 
 
 def _update_job(job_id: str, **kwargs):
     with _LOCK:
         if job_id in _JOBS:
             _JOBS[job_id].update(kwargs)
-            _JOBS[job_id]["updated_at"] = time.time()
+            now = time.time()
+            _JOBS[job_id]["updated_at"] = now
+            if "progress" in kwargs or "stage" in kwargs:
+                _JOBS[job_id]["last_progress_at"] = now
 
 
 def _run_ingestion_worker(job_id: str, temp_file_path: str, concept_vocab: list, pipeline):
@@ -84,7 +98,7 @@ def _run_ingestion_worker(job_id: str, temp_file_path: str, concept_vocab: list,
             concepts=dict(pipeline.concept_stats),
             error=None
         )
-        logger.info(f"Ingestion job {job_id} completed: {chunks_count} chunks from {pipeline.store.chunks[-1]['meta']['source'] if pipeline.store.chunks else 'file'}")
+        logger.info(f"Ingestion job {job_id} completed: {chunks_count} chunks stored.")
 
     except Exception as e:
         error_msg = str(e)

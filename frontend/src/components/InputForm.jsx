@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   FileText, Upload, Sparkles, Check, AlertCircle, 
-  Layers, HelpCircle, BookOpen, Sliders, CheckSquare, Zap, RefreshCw
+  Layers, HelpCircle, BookOpen, Sliders, CheckSquare, Zap, RefreshCw, Clock
 } from 'lucide-react';
 import { ingestDocument, getJobStatus, getLatestIngestionStatus } from '../api/client';
 
@@ -35,7 +35,7 @@ export default function InputForm({ onSubmit, loading }) {
   
   // Job & Ingestion states
   const [activeJobId, setActiveJobId] = useState(null);
-  const [jobStatus, setJobStatus] = useState(null); // { status, progress, stage, error, chunks_added, concepts }
+  const [jobStatus, setJobStatus] = useState(null); // { status, progress, stage, error, chunks_added, stalled_seconds }
   const [ingestionReady, setIngestionReady] = useState(false);
   const [totalChunksCount, setTotalChunksCount] = useState(0);
 
@@ -177,6 +177,7 @@ export default function InputForm({ onSubmit, loading }) {
   const isProcessing = jobStatus && (jobStatus.status === 'queued' || jobStatus.status === 'processing');
   const isFailed = jobStatus && jobStatus.status === 'failed';
   const isCompleted = jobStatus && jobStatus.status === 'completed';
+  const isTakingLonger = isProcessing && jobStatus.stalled_seconds && jobStatus.stalled_seconds > 25;
 
   return (
     <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
@@ -273,15 +274,32 @@ export default function InputForm({ onSubmit, loading }) {
               {/* Progress Bar */}
               <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
                 <div 
-                  className="bg-gradient-to-r from-indigo-500 to-violet-500 h-full transition-all duration-300 rounded-full"
+                  className="bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400 h-full transition-all duration-300 rounded-full"
                   style={{ width: `${Math.max(jobStatus.progress || 0, 5)}%` }}
                 />
               </div>
 
               <div className="flex justify-between items-center text-[11px] text-slate-400 font-mono">
-                <span>Job Status: <strong className="text-indigo-300 uppercase">{jobStatus.status}</strong></span>
+                <span>Status: <strong className="text-indigo-300 uppercase">{jobStatus.status}</strong></span>
                 {jobStatus.filename && <span>{jobStatus.filename}</span>}
               </div>
+
+              {/* Long running diagnostic info */}
+              {isTakingLonger && (
+                <div className="pt-2 border-t border-indigo-500/20 flex items-center justify-between text-[11px] text-amber-300">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                    Large textbook batch processing in progress (Active: {jobStatus.stalled_seconds}s)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    className="text-amber-400 hover:text-amber-200 underline text-[10px] font-semibold"
+                  >
+                    Restart
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
